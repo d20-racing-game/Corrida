@@ -1,6 +1,12 @@
 import { supabase } from "../lib/supabase.js";
 
-const roomSelect = "*, players!players_room_id_fkey(*), claimed_gifts(*)";
+const roomSelect = "*, players!players_room_id_fkey(*), claimed_gifts(*), birthday_cake_claims(*)";
+
+export async function getBirthdayEvent() {
+  const { data, error } = await supabase.from("temporary_events").select("starts_at, ends_at").eq("id", "todds-birthday").maybeSingle();
+  if (error) throw error;
+  return data;
+}
 
 export async function listRooms() {
   await supabase.rpc("cleanup_abandoned_rooms");
