@@ -1,5 +1,6 @@
 let context;
 let muted = false;
+const MASTER_VOLUME = 1.75;
 
 function audioContext() {
   if (!context) context = new (window.AudioContext || window.webkitAudioContext)();
@@ -13,7 +14,7 @@ function tone(frequency, duration = 0.12, type = "square", volume = 0.035, delay
   oscillator.type = type;
   oscillator.frequency.setValueAtTime(frequency, start);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(volume, start + 0.012);
+  gain.gain.exponentialRampToValueAtTime(Math.min(volume * MASTER_VOLUME, 0.16), start + 0.012);
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   oscillator.connect(gain).connect(ctx.destination);
   oscillator.start(start);
@@ -29,7 +30,7 @@ export function playDiceRoll() {
   const ctx = audioContext(), length = Math.floor(ctx.sampleRate * 0.72), buffer = ctx.createBuffer(1, length, ctx.sampleRate), data = buffer.getChannelData(0);
   for (let index = 0; index < length; index += 1) data[index] = (Math.random() * 2 - 1) * (1 - index / length);
   const source = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), gain = ctx.createGain();
-  filter.type = "bandpass"; filter.frequency.value = 750; filter.Q.value = 1.1; gain.gain.value = 0.045;
+  filter.type = "bandpass"; filter.frequency.value = 750; filter.Q.value = 1.1; gain.gain.value = 0.085;
   source.buffer = buffer; source.connect(filter).connect(gain).connect(ctx.destination); source.start();
   [0, .13, .26, .4, .54].forEach((delay, index) => tone(150 + index * 24, .055, "square", .025, delay));
 }

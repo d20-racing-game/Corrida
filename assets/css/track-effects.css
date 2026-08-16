@@ -50,7 +50,10 @@
   z-index: 12;
   left: 50%;
   top: 50%;
-  width: min(290px, 48%);
+  width: min(430px, 52%);
+  min-width: 280px;
+  max-height: 82%;
+  overflow: hidden;
   transform: translate(-50%, -50%);
   padding: 18px;
   text-align: center;
@@ -68,6 +71,14 @@
 .track-gift-panel p {min-height:30px;margin:9px 0;font-size:11px;color:#cbd5df}
 .track-gift-panel button {width:100%;padding:10px;border:0;background:#ff5a1f;color:#fff;font:700 9px "Orbitron",sans-serif;cursor:pointer}
 .track-gift-panel button:disabled {background:#47515c;color:#9ba5ae;cursor:not-allowed}
+.gift-target-list {display:flex;flex-direction:column;gap:6px;max-height:190px;margin:10px 0;overflow-y:auto;padding-right:3px}
+.track-gift-panel .gift-target-option {display:grid;grid-template-columns:30px 34px minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 8px;border:1px solid #47515c;background:#111a22;text-align:left}
+.track-gift-panel .gift-target-option:hover,.track-gift-panel .gift-target-option.is-selected {border-color:#ffe600;background:#273039;box-shadow:inset 3px 0 #ffe600}
+.gift-target-option span {color:#ffe600;text-align:center}
+.gift-target-option img {width:34px;height:34px;border:1px solid #687480;border-radius:50%;object-fit:cover}
+.track-gift-panel .gift-target-option strong {overflow:hidden;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.gift-target-option small {margin:0;color:#aeb9c3;font-size:7px;letter-spacing:.5px}
+.track-gift-panel .gift-target-confirm {margin-top:2px}
 
 @keyframes racerTrail {0%{opacity:.9;transform:scaleX(.3)}100%{opacity:0;transform:translateX(-28px) scaleX(1.5)}}
 @keyframes racerBoost {35%{transform:scale(1.18) rotate(5deg)}70%{transform:scale(.96) rotate(-2deg)}}
@@ -75,4 +86,4 @@
 @keyframes targetPulse {50%{transform:scale(1.13);box-shadow:0 0 22px #ffe600}}
 @keyframes trackGiftEnter {from{opacity:0;transform:translate(-50%,-50%) scale(.8)}}
 
-@media(max-width:650px){.track-gift-panel{width:62%;padding:12px}.track-gift-panel .track-gift-icon{font-size:38px}.track-gift-panel strong{font-size:11px}.track-gift-panel p{font-size:9px}}
+@media(max-width:650px){.track-gift-panel{width:86%;min-width:0;padding:12px}.track-gift-panel .track-gift-icon{font-size:38px}.track-gift-panel strong{font-size:11px}.track-gift-panel p{font-size:9px}.gift-target-list{max-height:145px}}

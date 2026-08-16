@@ -60,8 +60,10 @@ export async function removePlayer(playerId) {
   if (error) throw error;
 }
 
-export async function deleteRoom(roomId) {
-  const { error } = await supabase.from("rooms").delete().eq("id", roomId);
+export async function deleteRoom(roomCode) {
+  const { error } = await supabase.rpc("delete_room", {
+    p_room_code: roomCode
+  });
   if (error) throw error;
 }
 
