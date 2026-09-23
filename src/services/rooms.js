@@ -1,6 +1,6 @@
 import { supabase } from "../lib/supabase.js";
 
-const roomSelect = "*, players!players_room_id_fkey(*), claimed_gifts(*), birthday_cake_claims(*), piston_round_rolls(*), piston_lightning_claims(*)";
+const roomSelect = "*, players!players_room_id_fkey(*), claimed_gifts(*), birthday_cake_claims(*), piston_round_rolls(*), piston_lightning_claims(*), piston_cake_attacks(*)";
 
 export async function getBirthdayEvent() {
   const { data, error } = await supabase.from("temporary_events").select("starts_at, ends_at").eq("id", "todds-birthday").maybeSingle();
@@ -97,6 +97,16 @@ export async function rollPistonD20(roomCode, playerId) {
   return data;
 }
 
+export async function usePistonCake(roomCode, sourcePlayerId, targetPlayerId) {
+  const { data, error } = await supabase.rpc("use_piston_cake", {
+    p_room_code: roomCode,
+    p_source_player_id: sourcePlayerId,
+    p_target_player_id: targetPlayerId
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function useItem(roomCode, targetPlayerId) {
   const { data, error } = await supabase.rpc("use_pending_item", {
     p_room_code: roomCode,
@@ -154,6 +164,7 @@ export function subscribeToRoom(roomId, onChange) {
     .channel(`room:${roomId}`)
     .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: `id=eq.${roomId}` }, onChange)
     .on("postgres_changes", { event: "INSERT", schema: "public", table: "piston_round_rolls", filter: `room_id=eq.${roomId}` }, onChange)
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "piston_cake_attacks", filter: `room_id=eq.${roomId}` }, onChange)
     .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `room_id=eq.${roomId}` }, onChange)
     .subscribe();
   return () => supabase.removeChannel(channel);
