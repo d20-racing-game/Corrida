@@ -1,9 +1,15 @@
 import { supabase } from "../lib/supabase.js";
 
-const roomSelect = "*, players!players_room_id_fkey(*), claimed_gifts(*), birthday_cake_claims(*)";
+const roomSelect = "*, players!players_room_id_fkey(*), claimed_gifts(*), birthday_cake_claims(*), piston_round_rolls(*), piston_lightning_claims(*)";
 
 export async function getBirthdayEvent() {
   const { data, error } = await supabase.from("temporary_events").select("starts_at, ends_at").eq("id", "todds-birthday").maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function getPistonEvent() {
+  const { data, error } = await supabase.from("temporary_events").select("starts_at, ends_at").eq("id", "piston-cup").maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -29,14 +35,14 @@ export async function findRoom(code) {
   return data;
 }
 
-export async function createRoom({ name, laps, maxPlayersPerUser = 1 }) {
+export async function createRoom({ name, laps, maxPlayersPerUser = 1, gameMode = "normal" }) {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const bytes = crypto.getRandomValues(new Uint8Array(6));
     const code = Array.from(bytes, value => alphabet[value % alphabet.length]).join("");
     const { data, error } = await supabase
       .from("rooms")
-      .insert({ code, name, laps, max_players_per_user: maxPlayersPerUser })
+      .insert({ code, name, laps, max_players_per_user: maxPlayersPerUser, game_mode: gameMode })
       .select(roomSelect)
       .single();
     if (!error) return data;
@@ -81,6 +87,12 @@ export async function startRace(roomCode) {
 
 export async function rollD20(roomCode) {
   const { data, error } = await supabase.rpc("roll_d20", { p_room_code: roomCode });
+  if (error) throw error;
+  return data;
+}
+
+export async function rollPistonD20(roomCode, playerId) {
+  const { data, error } = await supabase.rpc("roll_piston_d20", { p_room_code: roomCode, p_player_id: playerId });
   if (error) throw error;
   return data;
 }
@@ -141,6 +153,7 @@ export function subscribeToRoom(roomId, onChange) {
   const channel = supabase
     .channel(`room:${roomId}`)
     .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: `id=eq.${roomId}` }, onChange)
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "piston_round_rolls", filter: `room_id=eq.${roomId}` }, onChange)
     .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `room_id=eq.${roomId}` }, onChange)
     .subscribe();
   return () => supabase.removeChannel(channel);

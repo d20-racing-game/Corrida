@@ -72,6 +72,16 @@ export function playBirthday() {
   [523, 659, 784, 1046, 1318].forEach((frequency, index) => tone(frequency, .24, index % 2 ? "triangle" : "square", .04, index * .09));
 }
 
+export function playTrafficLight(step) {
+  const frequencies = { red: 260, yellow: 420, green: 880 };
+  tone(frequencies[step] || 320, step === "green" ? .42 : .18, step === "green" ? "triangle" : "square", .055);
+  if (step === "green") tone(1320, .38, "square", .035, .08);
+}
+
+export function playKatchau() {
+  [330, 494, 659, 988].forEach((frequency, index) => tone(frequency, .18 + index * .04, index < 2 ? "sawtooth" : "triangle", .045, index * .07));
+}
+
 export function playChatBubble() {
   tone(620, .08, "sine", .018);
   tone(840, .11, "sine", .015, .065);
