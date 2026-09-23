@@ -14,11 +14,27 @@ create table if not exists public.piston_cake_attacks (
 );
 
 alter table public.piston_cake_attacks enable row level security;
+drop policy if exists "piston cake attacks are public" on public.piston_cake_attacks;
 create policy "piston cake attacks are public" on public.piston_cake_attacks
 for select to anon, authenticated using (true);
-alter publication supabase_realtime add table public.piston_cake_attacks;
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'piston_cake_attacks'
+  ) then
+    alter publication supabase_realtime add table public.piston_cake_attacks;
+  end if;
+end;
+$$;
 
-alter function public.start_race(text) rename to start_race_before_piston_cakes;
+do $$
+begin
+  if to_regprocedure('public.start_race_before_piston_cakes(text)') is null then
+    alter function public.start_race(text) rename to start_race_before_piston_cakes;
+  end if;
+end;
+$$;
 revoke all on function public.start_race_before_piston_cakes(text) from public, anon, authenticated;
 
 create or replace function public.start_race(p_room_code text)

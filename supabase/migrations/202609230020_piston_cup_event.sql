@@ -36,10 +36,18 @@ create table if not exists public.piston_lightning_claims (
 
 alter table public.piston_round_rolls enable row level security;
 alter table public.piston_lightning_claims enable row level security;
+drop policy if exists "piston rolls are public" on public.piston_round_rolls;
+drop policy if exists "piston lightning claims are public" on public.piston_lightning_claims;
 create policy "piston rolls are public" on public.piston_round_rolls for select to anon, authenticated using (true);
 create policy "piston lightning claims are public" on public.piston_lightning_claims for select to anon, authenticated using (true);
 
-alter function public.start_race(text) rename to start_race_before_piston_cup;
+do $$
+begin
+  if to_regprocedure('public.start_race_before_piston_cup(text)') is null then
+    alter function public.start_race(text) rename to start_race_before_piston_cup;
+  end if;
+end;
+$$;
 revoke all on function public.start_race_before_piston_cup(text) from public, anon, authenticated;
 
 create or replace function public.start_race(p_room_code text)
@@ -157,4 +165,13 @@ $$;
 revoke all on function public.roll_piston_d20(text, uuid) from public, anon;
 grant execute on function public.roll_piston_d20(text, uuid) to authenticated;
 
-alter publication supabase_realtime add table public.piston_round_rolls;
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'piston_round_rolls'
+  ) then
+    alter publication supabase_realtime add table public.piston_round_rolls;
+  end if;
+end;
+$$;
