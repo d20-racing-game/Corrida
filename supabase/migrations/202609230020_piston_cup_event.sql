@@ -125,12 +125,12 @@ begin
     where rolls.room_id = v_room.id and rolls.round = v_room.piston_round and rolls.player_id = player.id;
 
     with finishers as (
-      select player.id, row_number() over(order by rolls.total desc, rolls.created_at, player.id) as offset
+      select player.id, row_number() over(order by rolls.total desc, rolls.created_at, player.id) as position_offset
       from public.players player join public.piston_round_rolls rolls on rolls.player_id = player.id
       where rolls.room_id = v_room.id and rolls.round = v_room.piston_round
         and player.score >= v_total_distance and player.finish_position is null
     ), base as (select count(*) amount from public.players where room_id = v_room.id and finish_position is not null)
-    update public.players player set finish_position = base.amount + finishers.offset, finished_at = now()
+    update public.players player set finish_position = base.amount + finishers.position_offset, finished_at = now()
     from finishers, base where player.id = finishers.id;
 
     select jsonb_agg(jsonb_build_object('player_id', rolls.player_id, 'roll', rolls.roll,

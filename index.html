@@ -61,6 +61,8 @@
         <form id="createRoomForm">
           <label for="raceName">NOME DA CORRIDA</label>
           <input id="raceName" maxlength="36" placeholder="Ex: Grande Prêmio da Firma" required>
+          <label for="gameMode">MODO DE CORRIDA</label>
+          <select id="gameMode" class="setup-select"><option value="normal">🏁 Modo normal</option><option value="piston_cup">⚡ Copa Pistão</option></select>
           <label for="lapCount">QUANTIDADE DE VOLTAS</label>
           <div class="lap-quick" aria-label="Opções rápidas de voltas"><button type="button" data-laps="1">1 VOLTA</button><button type="button" data-laps="3" class="selected">3 VOLTAS</button><button type="button" data-laps="5">5 VOLTAS</button></div>
           <div class="lap-picker">
